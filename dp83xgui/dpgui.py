@@ -1,5 +1,4 @@
 
-
 # Date 2022/02/26 
 # Ultra Crappy DP83x GUI based on Colin O'Flynn's and kudl4t4's github repository by Justin Richards
 # Colin O'Flynn's - https://github.com/colinoflynn/dp83X-gui  https://www.youtube.com/watch?v=Mwu7hfbYQjk
@@ -10,12 +9,9 @@
 # pip install PyQt5 
 # pip install pyqtgraph
 # pip install pyvisa-py
+# pip install matplotlib
 
 #TCPIP0::192.168.1.60::INSTR  <- If using TCPIP then point browser to your IP address and it will reveal the "VISA TCP/IP String"
-
-# ToDo
-# 1. Use the fetched model number to set the channel limits
-# 2. start plot at Zero - two? samples so it clears the buffer and does a better job of auto ranging
 
 import os
 import sys
@@ -196,24 +192,21 @@ class DP83XGUI(QMainWindow):
 
         layout.addLayout(self.layoutcon)
 
-        self.channelSpecsDP832 = []
-        self.channelSpecsDP832.append({"maxV":30,"maxI":3})
-        self.channelSpecsDP832.append({"maxV":30,"maxI":3})
-        self.channelSpecsDP832.append({"maxV":5,"maxI":3})
-
-        self.channelSpecsDP831 = []
-        self.channelSpecsDP831.append({"maxV":8,"maxI":5})
-        self.channelSpecsDP831.append({"maxV":30,"maxI":2})
-        self.channelSpecsDP831.append({"maxV":30,"maxI":2})
-
+        self.channelSpecsDP83x = []
+        
+        self.channelSpecsDP83x.append({'DP832':{'maxV':30,'maxI':3},'DP831':{'maxV':8 ,'maxI':5}})
+        self.channelSpecsDP83x.append({'DP832':{'maxV':30,'maxI':3},'DP831':{'maxV':30,'maxI':2}})
+        self.channelSpecsDP83x.append({'DP832':{'maxV':5 ,'maxI':3},'DP831':{'maxV':30,'maxI':2}})
+        
         self.graphlist = []
         self.graphsettings = []
         self.chLineEdits =[]
         self.chConfig = []
         self.cbList = []
-        self.vdata = []
-        self.idata = []
-        self.pdata = []
+        
+        self.vdata = [[],[],[]]
+        self.idata = [[],[],[]]
+        self.pdata = [[],[],[]]
         self.filename = ""
         self.startLogTime = time.time() 
 
@@ -270,9 +263,10 @@ class DP83XGUI(QMainWindow):
         self.gridLayoutChannel.addWidget(self.lblPoint, 0, 2, 1, 1)
 
         self.graphsettings.append({"channel":"CH%d"%(graphnum+1), "points":1024})
-        self.vdata.append([0]*self.graphsettings[-1]["points"])
-        self.idata.append([0]*self.graphsettings[-1]["points"])
-        self.pdata.append([0]*self.graphsettings[-1]["points"])
+
+        self.vdata.append([-1])#*self.graphsettings[-1]["points"])
+        self.idata.append([-1])#*self.graphsettings[-1]["points"])
+        self.pdata.append([-1])#*self.graphsettings[-1]["points"])
 
         self.sbPoints = QSpinBox()
         self.sbPoints.setMinimum(10)
@@ -333,7 +327,10 @@ class DP83XGUI(QMainWindow):
         self.sbVolts.setAccelerated(True)
         self.sbVolts.setSuffix(" [V]")
         self.sbVolts.setDecimals(3)
-        self.sbVolts.setMaximum(self.channelSpecsDP832[graphnum]["maxV"])
+        print(self.leModel.text()) 
+        
+        
+        self.sbVolts.setMaximum(self.channelSpecsDP83x[graphnum][self.leModel.text()]["maxV"])
         self.sbVolts.setSingleStep(0.01)
         self.sbVolts.setObjectName("sbVolts")
         self.sbVolts.setValue(self.inst.queryVolt("CH%d"% (graphnum+1)))
@@ -343,7 +340,7 @@ class DP83XGUI(QMainWindow):
         self.sbCurrent.setAccelerated(True)
         self.sbCurrent.setSuffix(" [A]")
         self.sbCurrent.setDecimals(3)
-        self.sbCurrent.setMaximum(self.channelSpecsDP832[graphnum]["maxI"])
+        self.sbCurrent.setMaximum(self.channelSpecsDP83x[graphnum][self.leModel.text()]["maxI"])
         self.sbCurrent.setSingleStep(0.01)
         self.sbCurrent.setStepType(QAbstractSpinBox.AdaptiveDecimalStepType)
         self.sbCurrent.setObjectName("sbCurrent")
@@ -454,7 +451,9 @@ class DP83XGUI(QMainWindow):
             self.inst.writing(":OUTP "+self.graphsettings[channum]["channel"]+",OFF")
 
     def tryPausePlot(self, channum ):
-        print (channum)
+        """
+        """
+        #print (channum)
 
     def tryPauseTimer(self):
         if(self.pbPauseTimer.isChecked()):
@@ -463,7 +462,7 @@ class DP83XGUI(QMainWindow):
             self.readtimer.start()
 
     def dis(self):
-        print (self.cbChannel.currentText())
+        #print (self.cbChannel.currentText())
         self.readtimer.stop()
         self.inst.dis()
 
@@ -474,6 +473,15 @@ class DP83XGUI(QMainWindow):
         self.inst = DP83X()
         self.inst.conn(constr)
         self.leModel.setText(self.inst.identify()["model"]) 
+
+        self.layoutcon.addWidget(self.loggingPushButton)
+        self.layoutcon.addWidget(self.sbReadingsInterval)
+        self.layoutcon.addWidget(self.pbPauseTimer)
+        self.layoutcon.addWidget(QLabel("Temperature:"))
+        self.layoutcon.addWidget(self.leTemp)
+        self.layoutcon.addWidget(QLabel("Model:"))
+        self.layoutcon.addWidget(self.leModel)
+
         if self.drawDone == False:
             #self.addGraphs(self.cbNumDisplays.value()) # <- it can not be done this way.  It results in all functions refering to CH3 only
             for i in range (0,self.cbNumDisplays.value()):
@@ -488,20 +496,11 @@ class DP83XGUI(QMainWindow):
         self.readtimer.timeout.connect(self.updateReadings)
         self.readtimer.start()
         
-        self.layoutcon.addWidget(self.loggingPushButton)
-        self.layoutcon.addWidget(self.sbReadingsInterval)
-        self.layoutcon.addWidget(self.pbPauseTimer)
-        self.layoutcon.addWidget(QLabel("Temperature:"))
-        self.layoutcon.addWidget(self.leTemp)
-        self.layoutcon.addWidget(QLabel("Model:"))
-        self.layoutcon.addWidget(self.leModel)
 
     def setInterval(self, interval):
-        print(interval)
         self.readtimer.setInterval(self.sbReadingsInterval.value())
 
     def eStop(self, graphnum):
-        print(graphnum)
         self.inst.off()
 
     def setupChannel(self, graphnum):
@@ -516,7 +515,6 @@ class DP83XGUI(QMainWindow):
             self.inst.applyState(self.graphsettings[graphnum]["channel"],self.chConfig[graphnum]["cbState"].currentText())
 
     def setChannel(self, graphnum, channelstr):
-        print(graphnum)
         self.graphsettings[graphnum]["channel"] = channelstr
 
     def setPoints(self, graphnum, points):
@@ -552,7 +550,9 @@ class DP83XGUI(QMainWindow):
         """
 
     def setLogging(self):
-        print(self.loggingPushButton.isChecked())
+        """
+        """
+        #print(self.loggingPushButton.isChecked())
 
     def logData(self):#,readings,graphnum):
         path_to_log = "captures\\"
@@ -591,11 +591,10 @@ class DP83XGUI(QMainWindow):
         self.doFunction()
         for i, gs in enumerate(self.graphsettings):
             readings = self.inst.readings(gs["channel"])
-            
             self.vdata[i].append(readings["v"])
             self.idata[i].append(readings["i"])
             self.pdata[i].append(readings["p"])
-            
+        
             self.chLineEdits[i]["state"].setText(self.inst.state("CH%d"% (i+1)))
             self.chLineEdits[i]["volts"].setText(str(readings["v"]))
             self.chLineEdits[i]["current"].setText(str(readings["i"]))
@@ -629,7 +628,7 @@ class DP83XGUI(QMainWindow):
 def makeApplication():
     # Create the Qt Application
     app = QApplication(sys.argv)
-    app.setOrganizationName("Kissing Frogs")
+    app.setOrganizationName("GhettoFab Productions")
     app.setApplicationName("DP83X GUI")
     return app
 
