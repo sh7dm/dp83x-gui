@@ -629,7 +629,7 @@ class DP83XGUI(QMainWindow):
 def makeApplication():
     # Create the Qt Application
     app = QApplication(sys.argv)
-    app.setOrganizationName("GhettoFab Productions")
+    app.setOrganizationName("Kissing Frogs")
     app.setApplicationName("DP83X GUI")
     return app
 
