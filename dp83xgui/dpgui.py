@@ -13,6 +13,10 @@
 
 #TCPIP0::192.168.1.60::INSTR  <- If using TCPIP then point browser to your IP address and it will reveal the "VISA TCP/IP String"
 
+# ToDo
+# 1. Use the fetched model number to set the channel limits
+# 2. start plot at Zero - two? samples so it clears the buffer and does a better job of auto ranging
+
 import os
 import sys
 import time
@@ -176,6 +180,8 @@ class DP83XGUI(QMainWindow):
         self.pbPauseTimer = QPushButton("Pause Timer")
         self.pbPauseTimer.setCheckable(True)
         self.pbPauseTimer.clicked.connect(self.tryPauseTimer)
+
+
         
         self.leTemp = QLineEdit("---")
         self.leTemp.setObjectName("leTemp")
@@ -211,6 +217,7 @@ class DP83XGUI(QMainWindow):
         self.startLogTime = time.time() 
 
         self.degree = 0
+        self.temperatureWarningToggle = False
         
         # suspect it is 60mS is the fastest it can up date
         #pos slope 0 - 30V ~ 105mS
@@ -306,6 +313,11 @@ class DP83XGUI(QMainWindow):
         self.pbPause.setObjectName("pbPause")
         self.pbPause.setCheckable(True)
         self.pbPause.clicked.connect(lambda : self.tryPausePlot(graphnum))
+        
+        self.pbClearPlot = QPushButton()
+        self.pbPause.setObjectName("pbClearPlot")        
+        self.pbClearPlot.clicked.connect(lambda : self.clearPlot(graphnum))
+
 
         self.lblState = QLabel()
         self.lblState.setObjectName("lblState")
@@ -327,7 +339,7 @@ class DP83XGUI(QMainWindow):
         self.sbVolts.setAccelerated(True)
         self.sbVolts.setSuffix(" [V]")
         self.sbVolts.setDecimals(3)
-        print(self.leModel.text()) 
+        #print(self.leModel.text()) 
         
         
         self.sbVolts.setMaximum(self.channelSpecsDP83x[graphnum][self.leModel.text()]["maxV"])
@@ -392,9 +404,10 @@ class DP83XGUI(QMainWindow):
         self.ckFunction.setObjectName("ckFunction")
 
         self.chConfig.append({"ckState":self.ckState,"ckVoltage":self.ckVoltage,"ckCurrent":self.ckCurrent,"ckFunction":self.ckFunction, \
-        "cbState":self.cbState,"sbVolts":self.sbVolts,"sbCurrent":self.sbCurrent,"cbFunction":self.cbFunction,"pbPause":self.pbPause})
+        "cbState":self.cbState,"sbVolts":self.sbVolts,"sbCurrent":self.sbCurrent,"cbFunction":self.cbFunction,"pbPause":self.pbPause,"pbClearPlot":self.pbClearPlot})
         
-        self.gridLayoutChannel.addWidget(self.chConfig[-1]["pbPause"], 2, 0, 1, 2)
+        self.gridLayoutChannel.addWidget(self.chConfig[-1]["pbPause"], 2, 0, 1, 1)
+        self.gridLayoutChannel.addWidget(self.chConfig[-1]["pbClearPlot"], 2, 1, 1, 1)
         
         self.gridLayoutChannel.addWidget(self.chConfig[-1]["ckState"], 3, 2, 1, 1)
         self.gridLayoutChannel.addWidget(self.chConfig[-1]["ckVoltage"], 4, 2, 1, 1)
@@ -438,6 +451,7 @@ class DP83XGUI(QMainWindow):
         self.lblPower.setText(_translate("MainWindow", "Power [W]:"))
         self.pbPlotV.setText(_translate("MainWindow", "Plot V"))
         self.pbPause.setText(_translate("MainWindow", "PAUSE PLOT"))
+        self.pbClearPlot.setText(_translate("MainWindow", "CLEAR PLOT"))
         self.lblChannel.setText(_translate("MainWindow", "Channel"))
         self.pbPlotP.setText(_translate("MainWindow", "Plot P"))
         self.ckVoltage.setText(_translate("MainWindow", "Voltage [V]:"))
@@ -454,7 +468,12 @@ class DP83XGUI(QMainWindow):
         """
         """
         #print (channum)
-
+    def clearPlot(self,graphnum):
+        #arrayToClear = int(self.graphsettings[graphnum]["channel"][-1]) - 1
+        self.vdata[graphnum] = []
+        self.idata[graphnum] = []
+        self.pdata[graphnum] = []
+        
     def tryPauseTimer(self):
         if(self.pbPauseTimer.isChecked()):
             self.readtimer.stop()
@@ -495,6 +514,16 @@ class DP83XGUI(QMainWindow):
 
         self.readtimer.timeout.connect(self.updateReadings)
         self.readtimer.start()
+        
+
+        self.readDegCtimer = QtCore.QTimer()
+        self.readDegCtimer.setInterval(1000)
+
+        self.readDegCtimer.timeout.connect(self.updateSystTemperature)
+        self.readDegCtimer.start()
+
+
+        
         
 
     def setInterval(self, interval):
@@ -571,11 +600,11 @@ class DP83XGUI(QMainWindow):
                 self.filename = path_to_log + self.inst.identify()["model"] + "_" +  self.inst.identify()["serial"] + "_" + timestamp
                 header = b"Timestamp,Volts,Curr,Power\n"
 
-                for ch in range(1,3):
-                    file = open(self.filename + "_CH" + str(ch) + "." + file_format, "ab")
+                for ch in ["CH1","CH2","CH3"]:
+                    file = open(self.filename + "_" + ch + "." + file_format, "ab")
                     file.write(header) 
                     file.close
-            for ch in ["ch1","ch2","ch3"]:
+            for ch in ["CH1","CH2","CH3"]:
                 readings = self.inst.readings(ch)
                 file = open(self.filename + "_" + ch + "." + file_format, "ab")
                 file.write(("%f,%f,%f,%f\n" % (time.time() - self.startLogTime,readings["v"], readings["i"], readings["p"])).encode("utf-8"))
@@ -583,10 +612,32 @@ class DP83XGUI(QMainWindow):
         else:
             self.filename = ""
 
-
+    def updateSystTemperature(self):
+        degC = self.inst.temperature()
+        if(float(degC) > 40):
+            if(self.temperatureWarningToggle):
+                self.temperatureWarningToggle = False
+                self.leTemp.setStyleSheet("QLineEdit"
+                                "{"
+                                "background : pink;"
+                                "}")
+            else:
+                self.temperatureWarningToggle = True
+                self.leTemp.setStyleSheet("QLineEdit"
+                                "{"
+                                "background : white;"
+                                "}")
+        else:
+                self.leTemp.setStyleSheet("QLineEdit"
+                                "{"
+                                "background : lightgreen;"
+                                "}")        
+            
+        self.leTemp.setText(degC)
+    
     def updateReadings(self):
         #print(self.inst.state())
-        self.leTemp.setText(self.inst.temperature())
+        #self.updateSystTemperature(self.inst.temperature())
         self.logData()
         self.doFunction()
         for i, gs in enumerate(self.graphsettings):
