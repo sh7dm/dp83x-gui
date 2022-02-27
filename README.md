@@ -43,7 +43,7 @@ Changes made to the original repo
 7. Added Temperture
 8. Added option to vary Update interval
 9. Added Logging
-10. Added ESTOP (Press any of the three buttons and it turn off all channels)
+10. Added ESTOP (Press any of the three buttons and it turns off all 3 channels)
 11. Added logo
 12. Auto set channel limits based on the model 
 13. Zero plot at start for better auto ranging 
