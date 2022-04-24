@@ -16,7 +16,7 @@
 # ToDo
 # 1. Use the fetched model number to set the channel limits
 # 2. start plot at Zero - two? samples so it clears the buffer and does a better job of auto ranging
-
+CONNECTSTRING = "TCPIP0::192.168.1.60::INSTR"
 import os
 import sys
 import time
@@ -150,7 +150,7 @@ class DP83XGUI(QMainWindow):
         settings = QSettings()
 
         constr = settings.value('constring')
-        if constr is None: constr = "TCPIP0::192.168.1.60::INSTR" #"TCPIP0::172.16.0.125::INSTR" #"USB0::0x1AB1::0x0E11::DPXXXXXXXXXXX::INSTR"
+        if constr is None: constr = CONNECTSTRING#"TCPIP0::192.168.1.60::INSTR" #"TCPIP0::172.16.0.125::INSTR" #"USB0::0x1AB1::0x0E11::DPXXXXXXXXXXX::INSTR"
 
         self.constr = QLineEdit(constr)
         self.conpb = QPushButton("Connect")
@@ -679,7 +679,7 @@ class DP83XGUI(QMainWindow):
 def makeApplication():
     # Create the Qt Application
     app = QApplication(sys.argv)
-    app.setOrganizationName("GhettoFab Productions")
+    app.setOrganizationName("Kissing Frogs")
     app.setApplicationName("DP83X GUI")
     return app
 

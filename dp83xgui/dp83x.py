@@ -1,11 +1,11 @@
 # pip install pyvisa-py
 import pyvisa as visa
-
+CONNECTSTRING = "TCPIP0::192.168.1.60::INSTR"
 class DP83X(object):
     def __init__(self):
         pass
 
-    def conn(self, constr="TCPIP0::192.168.1.60::INSTR"):# "USB0::0x1AB1::0x0E11::DPXXXXXXXXXXX::INSTR"):
+    def conn(self, constr):#="TCPIP0::192.168.1.60::INSTR"):# "USB0::0x1AB1::0x0E11::DPXXXXXXXXXXX::INSTR"):
         """Attempt to connect to instrument"""
         rm = visa.ResourceManager()
         self.inst = rm.open_resource(constr)
@@ -69,9 +69,9 @@ class DP83X(object):
         return((self.inst.query(":SYSTem:SELF:TEST:TEMP?")).rstrip("\n"))
         
 if __name__ == '__main__':
-    test = DP832()
+    test = DP83X()
 
     #Insert your serial number here / confirm via Ultra Sigma GUI
-    test.conn("TCPIP0::172.16.0.125::INSTR")#"USB0::0x1AB1::0x0E11::DPXXXXXXXXXXX::INSTR")
+    test.conn(CONNECTSTRING)#"TCPIP0::192.168.1.60::INSTR")#"USB0::0x1AB1::0x0E11::DPXXXXXXXXXXX::INSTR")
     
     print (test.readings())
