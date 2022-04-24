@@ -1,4 +1,3 @@
-
 # Date 2022/02/26 
 # Ultra Crappy DP83x GUI based on Colin O'Flynn's and kudl4t4's github repository by Justin Richards
 # Colin O'Flynn's - https://github.com/colinoflynn/dp83X-gui  https://www.youtube.com/watch?v=Mwu7hfbYQjk
@@ -11,12 +10,14 @@
 # pip install pyvisa-py
 # pip install matplotlib
 
-#TCPIP0::192.168.1.60::INSTR  <- If using TCPIP then point browser to your IP address and it will reveal the "VISA TCP/IP String"
-
+#"TCPIP0::192.168.1.60::INSTR"  <- If using TCPIP then point browser to your IP address and it will reveal the "VISA TCP/IP String"
+#"USB0::0x1AB1::0x0E11::DPXXXXXXXXXXX::INSTR"
 # ToDo
-# 1. Use the fetched model number to set the channel limits
-# 2. start plot at Zero - two? samples so it clears the buffer and does a better job of auto ranging
+# 1. Use the fetched model number to set the channel limits - DONE
+# 2. start plot at Zero - two? samples so it clears the buffer and does a better job of auto ranging - DONE
+
 CONNECTSTRING = "TCPIP0::192.168.1.60::INSTR"
+
 import os
 import sys
 import time
@@ -150,7 +151,7 @@ class DP83XGUI(QMainWindow):
         settings = QSettings()
 
         constr = settings.value('constring')
-        if constr is None: constr = CONNECTSTRING#"TCPIP0::192.168.1.60::INSTR" #"TCPIP0::172.16.0.125::INSTR" #"USB0::0x1AB1::0x0E11::DPXXXXXXXXXXX::INSTR"
+        if constr is None: constr = CONNECTSTRING
 
         self.constr = QLineEdit(constr)
         self.conpb = QPushButton("Connect")
@@ -181,8 +182,6 @@ class DP83XGUI(QMainWindow):
         self.pbPauseTimer.setCheckable(True)
         self.pbPauseTimer.clicked.connect(self.tryPauseTimer)
 
-
-        
         self.leTemp = QLineEdit("---")
         self.leTemp.setObjectName("leTemp")
         
@@ -303,7 +302,6 @@ class DP83XGUI(QMainWindow):
         self.graphsettings[-1]["ienabled"] = self.pbPlotI
         self.graphsettings[-1]["penabled"] = self.pbPlotP
 
-
         self.pbEStop = QPushButton()
         self.pbEStop.setObjectName("pbEStop")
         self.pbEStop.clicked.connect(lambda : self.eStop(graphnum))
@@ -317,7 +315,6 @@ class DP83XGUI(QMainWindow):
         self.pbClearPlot = QPushButton()
         self.pbPause.setObjectName("pbClearPlot")        
         self.pbClearPlot.clicked.connect(lambda : self.clearPlot(graphnum))
-
 
         self.lblState = QLabel()
         self.lblState.setObjectName("lblState")
@@ -340,7 +337,6 @@ class DP83XGUI(QMainWindow):
         self.sbVolts.setSuffix(" [V]")
         self.sbVolts.setDecimals(3)
         #print(self.leModel.text()) 
-        
         
         self.sbVolts.setMaximum(self.channelSpecsDP83x[graphnum][self.leModel.text()]["maxV"])
         self.sbVolts.setSingleStep(0.01)
@@ -514,17 +510,12 @@ class DP83XGUI(QMainWindow):
 
         self.readtimer.timeout.connect(self.updateReadings)
         self.readtimer.start()
-        
 
         self.readDegCtimer = QtCore.QTimer()
         self.readDegCtimer.setInterval(1000)
 
         self.readDegCtimer.timeout.connect(self.updateSystTemperature)
         self.readDegCtimer.start()
-
-
-        
-        
 
     def setInterval(self, interval):
         self.readtimer.setInterval(self.sbReadingsInterval.value())
@@ -570,7 +561,6 @@ class DP83XGUI(QMainWindow):
         self.degree += 1
         if(self.degree == self.numSamples):
             self.degree = 0
-
 
     def setCurr(self, graphnum, mA):
         """
