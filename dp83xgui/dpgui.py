@@ -194,6 +194,7 @@ class DP83XGUI(QMainWindow):
         self.layoutcon.addWidget(self.conpb)
         self.layoutcon.addWidget(self.dispb)
         self.layoutcon.addWidget(self.cbNumDisplays)
+        self.setGeometry(30, 60, 500, 100)
 
         layout.addLayout(self.layoutcon)
 
