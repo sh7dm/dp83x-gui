@@ -16,7 +16,8 @@
 # 1. Use the fetched model number to set the channel limits - DONE
 # 2. start plot at Zero - two? samples so it clears the buffer and does a better job of auto ranging - DONE
 
-CONNECTSTRING = "TCPIP0::192.168.1.60::INSTR"
+CONNECTSTRING = "TCPIP0::172.16.0.125::INSTR"
+#CONNECTSTRING = "TCPIP0::192.168.1.60::INSTR"
 
 import os
 import sys
@@ -173,7 +174,7 @@ class DP83XGUI(QMainWindow):
         self.sbReadingsInterval.setAccelerated(True)
         self.sbReadingsInterval.setMinimum(1)
         self.sbReadingsInterval.setMaximum(600000)         #600 sec 10mins
-        self.sbReadingsInterval.setValue(500)
+        self.sbReadingsInterval.setValue(5000)
         self.sbReadingsInterval.setSuffix(" mS")
         self.sbReadingsInterval.setPrefix("Update ")
         self.sbReadingsInterval.valueChanged.connect(lambda x: self.setInterval( x))
@@ -269,7 +270,7 @@ class DP83XGUI(QMainWindow):
         self.lblPoint.setObjectName("lblPoint")
         self.gridLayoutChannel.addWidget(self.lblPoint, 0, 2, 1, 1)
 
-        self.graphsettings.append({"channel":"CH%d"%(graphnum+1), "points":1024})
+        self.graphsettings.append({"channel":"CH%d"%(graphnum+1), "points":4096})
 
         self.vdata.append([-1])#*self.graphsettings[-1]["points"])
         self.idata.append([-1])#*self.graphsettings[-1]["points"])

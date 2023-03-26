@@ -4,7 +4,8 @@ import pyvisa as visa
 # examples "TCPIP0::192.168.1.60::INSTR" 
 #          "USB0::0x1AB1::0x0E11::DPXXXXXXXXXXX::INSTR"
 
-CONNECTSTRING = "TCPIP0::192.168.1.60::INSTR"
+CONNECTSTRING = "TCPIP0::172.16.0.125::INSTR"
+#CONNECTSTRING = "TCPIP0::192.168.1.60::INSTR"
 
 class DP83X(object):
     def __init__(self):
