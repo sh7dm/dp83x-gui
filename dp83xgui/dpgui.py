@@ -210,6 +210,7 @@ class DP83XGUI(QMainWindow):
         self.chLineEdits =[]
         self.chConfig = []
         self.cbList = []
+        self.edata = [0,0,0]
         
         self.vdata = [[],[],[]]
         self.idata = [[],[],[]]
@@ -372,12 +373,16 @@ class DP83XGUI(QMainWindow):
 
         self.lePower = QLineEdit()
         self.lePower.setObjectName("lePower")
-        
-        self.chLineEdits.append({"state":self.leState,"volts":self.leVolts,"current":self.leCurrent,"power":self.lePower})
+
+        self.leEnergy = QLineEdit()
+        self.leEnergy.setObjectName("leEnergy")
+
+        self.chLineEdits.append({"state":self.leState,"volts":self.leVolts,"current":self.leCurrent,"power":self.lePower,"energy":self.leEnergy})
         self.gridLayoutChannel.addWidget(self.chLineEdits[-1]["state"], 3, 1, 1, 1)
         self.gridLayoutChannel.addWidget(self.chLineEdits[-1]["volts"], 4, 1, 1, 1)
         self.gridLayoutChannel.addWidget(self.chLineEdits[-1]["current"], 5, 1, 1, 1)
         self.gridLayoutChannel.addWidget(self.chLineEdits[-1]["power"], 6, 1, 1, 1)
+        self.gridLayoutChannel.addWidget(self.chLineEdits[-1]["energy"], 7, 1, 1, 1)
         
         self.lblCurr = QLabel()
         self.lblCurr.setObjectName("lblCurr")
@@ -391,6 +396,10 @@ class DP83XGUI(QMainWindow):
         self.lblPower = QLabel()
         self.lblPower.setObjectName("lblPower")
         self.gridLayoutChannel.addWidget(self.lblPower, 6, 0, 1, 1)
+
+        self.lblEnergy = QLabel()
+        self.lblEnergy.setObjectName("lblEnergy")
+        self.gridLayoutChannel.addWidget(self.lblEnergy, 7, 0, 1, 1)
 
         self.ckState = QCheckBox()
         self.ckState.setObjectName("ckState")
@@ -439,6 +448,7 @@ class DP83XGUI(QMainWindow):
         self.ckState.setText(_translate("MainWindow", "State: "))
         self.pbEStop.setText(_translate("MainWindow", "E STOP"))
         self.lePower.setText(_translate("MainWindow", "---"))
+        self.leEnergy.setText(_translate("MainWindow", "---"))
         self.leCurrent.setText(_translate("MainWindow", "---"))
         self.lblCurr.setText(_translate("MainWindow", "Current [A]:"))
         self.lblVoltage.setText(_translate("MainWindow", "Voltage [V]:"))
@@ -447,6 +457,7 @@ class DP83XGUI(QMainWindow):
         self.leState.setText(_translate("MainWindow", "---"))
         self.lblPoint.setText(_translate("MainWindow", "Points"))
         self.lblPower.setText(_translate("MainWindow", "Power [W]:"))
+        self.lblEnergy.setText(_translate("MainWindow", "Energy [Wh]:"))
         self.pbPlotV.setText(_translate("MainWindow", "Plot V"))
         self.pbPause.setText(_translate("MainWindow", "PAUSE PLOT"))
         self.pbClearPlot.setText(_translate("MainWindow", "CLEAR PLOT"))
@@ -590,7 +601,7 @@ class DP83XGUI(QMainWindow):
                 # Prepare filename as C:\MODEL_SERIAL_YYYY-MM-DD_HH.MM.SS
                 timestamp = time.strftime("%Y%m%d_%H%M%S", time.localtime())
                 self.filename = path_to_log + self.inst.identify()["model"] + "_" +  self.inst.identify()["serial"] + "_" + timestamp
-                header = b"Timestamp,Volts,Curr,Power\n"
+                header = b"Timestamp,Volts,Curr,Power,Energy\n"
 
                 for ch in ["CH1","CH2","CH3"]:
                     file = open(self.filename + "_" + ch + "." + file_format, "ab")
@@ -599,7 +610,7 @@ class DP83XGUI(QMainWindow):
             for ch in ["CH1","CH2","CH3"]:
                 readings = self.inst.readings(ch)
                 file = open(self.filename + "_" + ch + "." + file_format, "ab")
-                file.write(("%f,%f,%f,%f\n" % (time.time() - self.startLogTime,readings["v"], readings["i"], readings["p"])).encode("utf-8"))
+                file.write(("%f,%f,%f,%f,%f\n" % (time.time() - self.startLogTime,readings["v"], readings["i"], readings["p"], readings["p"]*5000/(60*60*1000))).encode("utf-8"))
                 file.close
         else:
             self.filename = ""
@@ -637,11 +648,13 @@ class DP83XGUI(QMainWindow):
             self.vdata[i].append(readings["v"])
             self.idata[i].append(readings["i"])
             self.pdata[i].append(readings["p"])
+            self.edata[i] = self.edata[i] + (readings["v"] * readings["i"] * self.sbReadingsInterval.value() / (60 * 60 * 1000))
         
             self.chLineEdits[i]["state"].setText(self.inst.state("CH%d"% (i+1)))
             self.chLineEdits[i]["volts"].setText(str(readings["v"]))
             self.chLineEdits[i]["current"].setText(str(readings["i"]))
             self.chLineEdits[i]["power"].setText(str(readings["p"]))
+            self.chLineEdits[i]["energy"].setText(str("%.3f"%self.edata[i]) )
             while len(self.vdata[i]) > gs["points"]:
                 self.vdata[i].pop(0)
 
