@@ -316,8 +316,13 @@ class DP83XGUI(QMainWindow):
         self.pbPause.clicked.connect(lambda : self.tryPausePlot(graphnum))
         
         self.pbClearPlot = QPushButton()
-        self.pbPause.setObjectName("pbClearPlot")        
+        self.pbClearPlot.setObjectName("pbClearPlot")        
         self.pbClearPlot.clicked.connect(lambda : self.clearPlot(graphnum))
+
+        self.pbClearEnergy = QPushButton()
+        self.pbClearEnergy.setObjectName("pbClearEnergy")        
+        self.pbClearEnergy.clicked.connect(lambda : self.clearEnergy(graphnum))
+
 
         self.lblState = QLabel()
         self.lblState.setObjectName("lblState")
@@ -411,10 +416,11 @@ class DP83XGUI(QMainWindow):
         self.ckFunction.setObjectName("ckFunction")
 
         self.chConfig.append({"ckState":self.ckState,"ckVoltage":self.ckVoltage,"ckCurrent":self.ckCurrent,"ckFunction":self.ckFunction, \
-        "cbState":self.cbState,"sbVolts":self.sbVolts,"sbCurrent":self.sbCurrent,"cbFunction":self.cbFunction,"pbPause":self.pbPause,"pbClearPlot":self.pbClearPlot})
+        "cbState":self.cbState,"sbVolts":self.sbVolts,"sbCurrent":self.sbCurrent,"cbFunction":self.cbFunction,"pbPause":self.pbPause,"pbClearPlot":self.pbClearPlot,"pbClearEnergy":self.pbClearEnergy})
         
         self.gridLayoutChannel.addWidget(self.chConfig[-1]["pbPause"], 2, 0, 1, 1)
         self.gridLayoutChannel.addWidget(self.chConfig[-1]["pbClearPlot"], 2, 1, 1, 1)
+        self.gridLayoutChannel.addWidget(self.chConfig[-1]["pbClearEnergy"], 7, 2, 1, 1)
         
         self.gridLayoutChannel.addWidget(self.chConfig[-1]["ckState"], 3, 2, 1, 1)
         self.gridLayoutChannel.addWidget(self.chConfig[-1]["ckVoltage"], 4, 2, 1, 1)
@@ -461,6 +467,7 @@ class DP83XGUI(QMainWindow):
         self.pbPlotV.setText(_translate("MainWindow", "Plot V"))
         self.pbPause.setText(_translate("MainWindow", "PAUSE PLOT"))
         self.pbClearPlot.setText(_translate("MainWindow", "CLEAR PLOT"))
+        self.pbClearEnergy.setText(_translate("MainWindow", "CLEAR ENERGY"))
         self.lblChannel.setText(_translate("MainWindow", "Channel"))
         self.pbPlotP.setText(_translate("MainWindow", "Plot P"))
         self.ckVoltage.setText(_translate("MainWindow", "Voltage [V]:"))
@@ -482,6 +489,11 @@ class DP83XGUI(QMainWindow):
         self.vdata[graphnum] = []
         self.idata[graphnum] = []
         self.pdata[graphnum] = []
+
+    def clearEnergy(self,graphnum):
+        #arrayToClear = int(self.graphsettings[graphnum]["channel"][-1]) - 1
+        self.edata[graphnum] = 0
+
         
     def tryPauseTimer(self):
         if(self.pbPauseTimer.isChecked()):
