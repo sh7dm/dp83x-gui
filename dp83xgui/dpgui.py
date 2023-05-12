@@ -643,17 +643,20 @@ class DP83XGUI(QMainWindow):
                 self.temperatureWarningToggle = False
                 self.leTemp.setStyleSheet("QLineEdit"
                                 "{"
+                                "color: black;"
                                 "background : pink;"
                                 "}")
             else:
                 self.temperatureWarningToggle = True
                 self.leTemp.setStyleSheet("QLineEdit"
                                 "{"
+                                "color: black;"
                                 "background : white;"
                                 "}")
         else:
                 self.leTemp.setStyleSheet("QLineEdit"
                                 "{"
+                                "color: black;"
                                 "background : lightgreen;"
                                 "}")        
             
