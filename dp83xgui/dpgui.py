@@ -717,4 +717,4 @@ if __name__ == '__main__':
     window.show()
 
     # Run the main Qt loop
-    sys.exit(app.exec_())
+    sys.exit(app.exec())
