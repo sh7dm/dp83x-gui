@@ -37,6 +37,7 @@ class DP83X(object):
                 self.inst = rm.open_resource(constr)
         except Exception as err:
             print("Failed to connect to ", constr, ": ", err)
+            raise err
   
     def identify(self):
         """Return identify string which has serial number"""

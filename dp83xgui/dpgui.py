@@ -511,7 +511,12 @@ class DP83XGUI(QMainWindow):
         QSettings().setValue('constring', constr)
 
         self.inst = DP83X()
-        self.inst.conn(constr)
+        try:
+            self.inst.conn(constr)
+        except Exception as err:
+            self.statusBar().showMessage(str(err))
+            return
+
         self.leModel.setText(self.inst.identify()["model"]) 
 
         self.layoutcon.addWidget(self.loggingPushButton)
