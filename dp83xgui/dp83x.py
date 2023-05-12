@@ -1,11 +1,25 @@
 # pip install pyvisa-py
-import pyvisa as visa
+import os
+
 #Insert your serial number here / confirm via Ultra Sigma GUI
 # examples "TCPIP0::192.168.1.60::INSTR" 
 #          "USB0::0x1AB1::0x0E11::DPXXXXXXXXXXX::INSTR"
 
 CONNECTSTRING = "TCPIP0::172.16.0.125::INSTR"
 #CONNECTSTRING = "TCPIP0::192.168.1.60::INSTR"
+
+# Implementation using char devices
+# e.g. Linux USBTMC kernel driver or RS-232
+class CharDevInst():
+    def __init__(self, path):
+        self.fd = os.open(path, os.O_RDWR)
+
+    def write(self, cmd):
+        os.write(self.fd, cmd.encode("ascii"))
+
+    def query(self, cmd):
+        self.write(cmd)
+        return os.read(self.fd, 4096).decode("ascii")
 
 class DP83X(object):
     def __init__(self):
@@ -14,10 +28,15 @@ class DP83X(object):
     def conn(self, constr):
         """Attempt to connect to instrument"""
         try:
-            rm = visa.ResourceManager()
-            self.inst = rm.open_resource(constr)
-        except visa.VisaIOError:
-            print("\n\n\nFailed to connect to",constr,"\n\n\n")
+            # /dev/usbtmc0, maybe TTY for RS-232
+            if constr.startswith('/'):
+                self.inst = CharDevInst(constr)
+            else:
+                import pyvisa as visa
+                rm = visa.ResourceManager()
+                self.inst = rm.open_resource(constr)
+        except Exception as err:
+            print("Failed to connect to ", constr, ": ", err)
   
     def identify(self):
         """Return identify string which has serial number"""
