@@ -608,7 +608,7 @@ class DP83XGUI(QMainWindow):
         #print(self.loggingPushButton.isChecked())
 
     def logData(self):#,readings,graphnum):
-        path_to_log = "captures\\"
+        path_to_log = "captures/"
         file_format = "csv"
         try:
             os.makedirs(path_to_log)
