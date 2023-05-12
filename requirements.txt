@@ -2,3 +2,4 @@ pyside6
 pyqtgraph
 pyvisa-py
 matplotlib
+qt-material

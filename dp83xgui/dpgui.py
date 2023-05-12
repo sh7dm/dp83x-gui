@@ -34,6 +34,8 @@ from PySide6.QtGui import *
 from PySide6.QtWidgets import * #QApplication, QWidget, QMainWindow, QPushButton, QMessageBox, QBoxLayout
 from PySide6 import QtCore, QtGui
 
+from qt_material import apply_stylesheet
+
 try:
     import pyqtgraph as pg
     import pyqtgraph.parametertree.parameterTypes as pTypes
@@ -715,6 +717,11 @@ class DP83XGUI(QMainWindow):
 def makeApplication():
     # Create the Qt Application
     app = QApplication(sys.argv)
+    apply_stylesheet(
+        app,
+        theme='dark_teal.xml',
+        invert_secondary=False,
+    )
     app.setOrganizationName("Kissing Frogs")
     app.setApplicationName("DP83X GUI")
     return app
