@@ -144,7 +144,11 @@ class DP83XGUI(QMainWindow):
     def __init__(self):
         super(DP83XGUI, self).__init__()
         self.setWindowIcon(QtGui.QIcon('frog1.bmp'))
-        wid = QWidget()
+        root = QWidget()
+        mainLayout = QVBoxLayout()
+        scroll = QScrollArea()
+        scroll.setWidgetResizable(True)
+        self.container = QWidget()
         layout = QVBoxLayout()
         self.drawDone = False
 
@@ -241,9 +245,12 @@ class DP83XGUI(QMainWindow):
         self.absSinX = (sinX +1)/2
         shiftedAbsSinX = (np.sin((2*np.pi*F)*((x+(3/4)*(self.numSamples))/self.numSamples) )+1)/2
 
-        wid.setLayout(layout)
+        self.container.setLayout(layout)
+        scroll.setWidget(self.container)
+        mainLayout.addWidget(scroll)
+        root.setLayout(mainLayout)
 
-        self.setCentralWidget(wid)
+        self.setCentralWidget(root)
         self.setWindowTitle("DP83X GUI")
 
     def closeEvent(self, event):
@@ -251,8 +258,9 @@ class DP83XGUI(QMainWindow):
         event.accept()
 
     def addGraphs(self, graphnum):
-        layout = self.centralWidget().layout()
+        layout = self.container.layout()
         gb = QGroupBox()
+        gb.setMinimumHeight(240)
 
         self.gridLayoutChannel = QGridLayout()
 
