@@ -247,6 +247,10 @@ class DP83XGUI(QMainWindow):
         self.setCentralWidget(wid)
         self.setWindowTitle("DP83X GUI")
 
+    def closeEvent(self, event):
+        self.dis()
+        event.accept()
+
     def addGraphs(self, graphnum):
         layout = self.centralWidget().layout()
         gb = QGroupBox()

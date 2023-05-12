@@ -54,6 +54,7 @@ class DP83X(object):
         return dr
 
     def dis(self):
+        self.inst.write(":SYSTEM:LOCAL")
         del self.inst
     
     def applyVoltage(self,channel, voltage):
