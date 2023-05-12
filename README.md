@@ -8,11 +8,10 @@ Rigol DP83X GUI. This is a simple graphing GUI based on Colin O'Flynn's and kudl
 To use this you'll need to install:
 
  * Ultra Sigma from Rigol [OPTIONAL: Can also just copy/paste the address from the DP83X (DP831,DP832) display]
- * Python 3.x with pyside6 PyQt5 pyqtgraph pyvisa-py install as follows
+ * Python 3.x
  * pip install pyside6
- * pip install PyQt5 
  * pip install pyqtgraph
- * pip install pyvisa-py
+ * pip install pyvisa-py [On Linux you can skip this and use /dev/usbtmc*]
  * pip install matplotlib
  
 Once your system is running, just run dpgui.py via your installed Python. Supply the address string (open Ultra Sigma, make sure it finds your Power Supply, and copy-paste address string from that, OR just look in the 'utilities' menu, OR point your browser to its IP address). 
@@ -22,6 +21,8 @@ Will look something like
  TCPIP0::192.168.1.60::INSTR
 
 If the address copied from the DP83X (DP831,DP832) display doesn't work, install Ultra Sigma to confirm it is detected there. If Ultra Sigma didn't see the power supply something else is up...
+
+On Linux, run `ls -alh /dev/usbtmc*`, check if you have access and use the device filename directly
 
 Bugs
 =======

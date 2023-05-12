@@ -5,7 +5,6 @@
 #
 # Python 3.10.0
 # pip install pyside6
-# pip install PyQt5 
 # pip install pyqtgraph
 # pip install pyvisa-py
 # pip install matplotlib
