@@ -201,9 +201,9 @@ class DP83XGUI(QMainWindow):
 
         self.channelSpecsDP83x = []
         
-        self.channelSpecsDP83x.append({'DP832A':{'maxV':30,'maxI':3},'DP831':{'maxV':8 ,'maxI':5}})
-        self.channelSpecsDP83x.append({'DP832A':{'maxV':30,'maxI':3},'DP831':{'maxV':30,'maxI':2}})
-        self.channelSpecsDP83x.append({'DP832A':{'maxV':5 ,'maxI':3},'DP831':{'maxV':30,'maxI':2}})
+        self.channelSpecsDP83x.append({'DP832A':{'maxV':30,'maxI':3},'DP832':{'maxV':30,'maxI':3},'DP831':{'maxV':8 ,'maxI':5}})
+        self.channelSpecsDP83x.append({'DP832A':{'maxV':30,'maxI':3},'DP832':{'maxV':30,'maxI':3},'DP831':{'maxV':30,'maxI':2}})
+        self.channelSpecsDP83x.append({'DP832A':{'maxV':5 ,'maxI':3},'DP832':{'maxV':5 ,'maxI':3},'DP831':{'maxV':30,'maxI':2}})
         
         self.graphlist = []
         self.graphsettings = []
