@@ -32,8 +32,8 @@ import numpy as np
 from PySide6.QtCore import *
 from PySide6.QtGui import *
 
-from PyQt5.QtWidgets import * #QApplication, QWidget, QMainWindow, QPushButton, QMessageBox, QBoxLayout
-from PyQt5 import QtCore, QtGui
+from PySide6.QtWidgets import * #QApplication, QWidget, QMainWindow, QPushButton, QMessageBox, QBoxLayout
+from PySide6 import QtCore, QtGui
 
 try:
     import pyqtgraph as pg
